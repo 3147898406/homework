@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>贪吃蛇</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+</head>
+<body>
+    <div id="page">
+        <div id="yard">
+            <canvas id="canvas" height="400px" width="400px"></canvas>
+        </div>
+        <div id="help">
+            <div id="mark">
+                得分：<span id="mark_con"></span>
+            </div>
+            <div id="helper">
+                <table>
+                    <tr>
+                        <td></td>
+                        <td><button onclick="keydown(38);">上</button></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><button onclick="keydown(37);">左</button></td>
+                        <td><button onclick="keydown(80);" id="pause">暂停</button></td>
+                        <td><button onclick="keydown(39);">右</button></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><button onclick="keydown(40);">下</button></td>
+                        <td></td>
+                    </tr>
+                </table>
+                <a href="index.html">再玩一次</a>
+            </div>
+        </div>
+    </div>
+    <div style="text-align:center;">
+    </div>
+    <script type="text/javascript">
+        var block_size = 20;        //格子大小
+        var cols = 20;              //列数
+        var rows = 20;              //行数
+        var snakes = [];            //保存蛇坐标
+        var c = null;               //绘图对象
+        var toGo = 3;               //行进方向
+        var snakecount = 4;         //蛇身数量
+        var interval = null;        //计时器
+        var foodX = 0;              //食物X轴坐标
+        var foodY = 0;              //食物Y轴坐标
+        var oMark = null;           //分数显示框
+        var isPause = false;        //是否暂停
+        // 绘图
+        function draw(){
+            c.clearRect(0, 0, block_size * cols, block_size * rows);
+            //横线
+            for( var i = 1; i <= rows; i++ ) {
+                c.beginPath();
+                c.moveTo(0, i * block_size);
+                c.lineTo(block_size * cols, i * block_size);
+                c.strokeStyle = "gray";
+                c.stroke();
+            }
+            //竖线
+            for(var i = 1; i <= cols; i++){
+                c.beginPath();
+                c.moveTo(i * block_size, 0);
+                c.lineTo(i * block_size, block_size * rows);
+                c.stroke();
+            }
+            //蛇
+            for (var i = 0; i < snakes.length; i++){
+                c.beginPath();
+                c.fillStyle = "green";
+                c.fillRect(snakes[i].x, snakes[i].y, block_size, block_size);
+                c.moveTo(snakes[i].x, snakes[i].y);
+                c.lineTo(snakes[i].x + block_size, snakes[i].y);
+                c.lineTo(snakes[i].x + block_size, snakes[i].y + block_size);
+                c.lineTo(snakes[i].x, snakes[i].y + block_size);
+                c.closePath();
+                c.strokeStyle = "red";
+                c.stroke();
+            }
+            //食物
+            c.beginPath();
+            c.fillStyle = "blue";
+            c.fillRect(foodX, foodY, block_size, block_size);
+            c.moveTo(foodX, foodY);
+            c.lineTo(foodX + block_size, foodY);
+            c.lineTo(foodX + block_size, foodY + block_size);
+            c.lineTo(foodX, foodY + block_size);
+            c.closePath();
+            c.strokeStyle = "red";
+            c.stroke();
+        }
+        //初始化
+        function start(){
+            for( var i = 0; i < snakecount; i++){
+                snakes[i] = {x: i * block_size, y: 0};
+            }
+            addFood();
+            oMark.innerHTML = 0;
+        }
+        //移动
+        function move(){
+            switch(toGo){
+                case 1: //左
+                    snakes.push({x: snakes[snakecount - 1].x - block_size, y: snakes[snakecount - 1].y});
+                break;
+                case 2: //上
+                    snakes.push({x: snakes[snakecount - 1].x, y: snakes[snakecount - 1].y - block_size});
+                break;
+                case 3: //右
+                    snakes.push({x: snakes[snakecount - 1].x + block_size, y: snakes[snakecount - 1].y});
+                break;
+                case 4: //下
+                    snakes.push({x: snakes[snakecount - 1].x, y: snakes[snakecount - 1].y + block_size});
+                break;
+                default:;
+            }
+            snakes.shift();
+            isEat();
+            isDie();
+            draw();
+        }
+        //吃到食物判断
+        function isEat(){
+            if (snakes[snakecount - 1].x == foodX && snakes[snakecount - 1].y == foodY) {
+                oMark.innerHTML = (parseInt(oMark.innerHTML) + 1).toString();
+                addFood();
+                addSnake();
+            }
+        }
+        //添加蛇身
+        function addSnake(){
+            snakecount++;
+            snakes.unshift({x:block_size * cols, y:block_size * rows});
+        }
+        //交互响应
+        function keydown(keyCode){
+            switch(keyCode){
+                case 37: //左
+                    if(toGo != 1 && toGo != 3) toGo = 1;break;
+                case 38: //上
+                    if(toGo != 2 && toGo != 4) toGo = 2;break;
+                case 39: //右
+                    if(toGo != 3 && toGo != 1) toGo = 3;break;
+                case 40: //下
+                    if(toGo != 4 && toGo != 2) toGo = 4;break;
+                case 80: //开始/暂停
+                    if(isPause){
+                        interval = setInterval(move,200);
+                        isPause = false;
+                        document.getElementById('pause').innerHTML = "暂停";
+                    }else{
+                        clearInterval(interval);
+                        isPause = true;
+                        document.getElementById('pause').innerHTML = "开始";
+                    }
+                    break;
+            }
+        }
+        //制造食物
+        function addFood(){
+            foodX = Math.floor(Math.random() * (cols - 1)) * block_size;
+            foodY = Math.floor(Math.random() * (rows - 1)) * block_size;
+        }
+        //死亡判断
+        function isDie(){
+           if(snakes[snakecount - 1].x == -20 || snakes[snakecount - 1].x == block_size * cols 
+                || snakes[snakecount - 1].y == -20 || snakes[snakecount - 1].y == block_size * rows){
+                alert("Game Over!");
+                clearInterval(interval);
+            }
+            for(var i = 0; i < snakecount - 1; i++){
+                if(snakes[snakecount - 1].x == snakes[i].x && snakes[snakecount - 1].y == snakes[i].y){
+                        clearInterval(interval);
+                        alert("Game Over!");
+                }
+            }
+        }
+        //启动
+        window.onload = function(){
+            c = document.getElementById('canvas').getContext('2d');
+            oMark = document.getElementById('mark_con');
+            start();
+            interval = setInterval(move,200);
+            document.onkeydown = function(event){
+                var event = event || window.event;
+                keydown(event.keyCode);
+            }
+        }
+    </script>
+</body>
+</html>

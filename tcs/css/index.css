@@ -1,0 +1,34 @@
+* {
+    margin:0 auto;
+    padding: 0;
+    font-family: "Microsoft YaHei";
+}
+#page {
+    margin-right: auto;
+    margin-left: auto; 
+    margin-top: 20px;
+    height: 600px; 
+    width: 800px; 
+}
+#yard {
+    width: 400px;
+    border: 1px solid;
+    box-shadow: 0 0 10px black;
+}
+#help {
+    margin-top: 20px;
+}
+#mark {
+    font-weight: 800;
+}
+#mark_con {
+    color: red; 
+}
+button {
+    width: 50px; 
+    background-color: #54d;
+    border-radius: 10px;
+}
+a {
+    text-decoration:none;
+}
